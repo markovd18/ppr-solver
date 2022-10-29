@@ -1,5 +1,4 @@
 #include <iostream>
-#include "test/test.h"
 
 int wmain(int argc, wchar_t **argv)
 {
@@ -12,6 +11,4 @@ int wmain(int argc, wchar_t **argv)
 	{
 		std::wcout << i << std::endl;
 	}
-
-	test();
 }
