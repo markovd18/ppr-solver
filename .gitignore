@@ -1,0 +1,11 @@
+compiled
+compiled/*
+msvc/x64
+vzorove odevzdani.zip
+.vscode
+.vs
+
+*.idb
+*.obj
+*.pdb
+src/*.nativecodeanalysis*
