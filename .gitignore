@@ -1,6 +1,7 @@
 compiled
 compiled/*
 msvc/x64
+mscv/Release
 vzorove odevzdani.zip
 .vscode
 .vs
