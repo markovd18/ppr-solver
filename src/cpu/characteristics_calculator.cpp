@@ -16,7 +16,7 @@ void RunningStats::Clear() {
 void RunningStats::Push(const double x) {
     double delta, delta_n, delta_n2, term1;
 
-    long long n1 = n;
+    double n1 = n;
     n++;
     // vektorizovat urèitì tohle
     // teoreticky by šel každej krok rozdìlit na batche a dìlat ve forloopu po 4 a pøekladaè to snad pochopí
@@ -39,7 +39,7 @@ void RunningStats::Push_Vector(const std::vector<double>& data) {
     }
 }
 
-long long RunningStats::NumDataValues() const {
+double RunningStats::NumDataValues() const {
     return n;
 }
 
@@ -93,6 +93,88 @@ RunningStats operator+(const RunningStats a, const RunningStats b) {
 
 RunningStats& RunningStats::operator+=(const RunningStats& rhs) {
     RunningStats combined = *this + rhs;
+    *this = combined;
+    return *this;
+}
+
+RunningStatsSOA::RunningStatsSOA() {
+    Clear();
+}
+
+void RunningStatsSOA::Clear() {
+    m_n.fill(0);
+    m_M1.fill(0.0);
+    m_M2.fill(0.0);
+    m_M3.fill(0.0);
+    m_M4.fill(0.0);
+}
+
+void RunningStatsSOA::Push(const double x) {
+}
+
+void RunningStatsSOA::Push_Vector(const std::vector<double>& data) {
+    for (std::size_t i = 0; i < data.size(); i += 4) {
+        Push(data[i]);
+        Push(data[i + 1]);
+        Push(data[i + 2]);
+        Push(data[i + 3]);
+    }
+}
+
+double RunningStatsSOA::NumDataValues() const {
+    return m_n[0];
+}
+
+double RunningStatsSOA::Mean() const {
+    return m_M1[0];
+}
+
+//double RunningStatsSOA::Variance() const {
+//    return M2 / (n - 1.0);
+//}
+
+//double RunningStatsSOA::StandardDeviation() const {
+//    return sqrt(Variance());
+//}
+
+//double RunningStatsSOA::Skewness() const {
+//    return sqrt(double(n)) * M3 / pow(M2, 1.5);
+//}
+
+double RunningStatsSOA::Kurtosis() const
+{
+    return double(m_n[0]) * m_M4[0] / (m_M2[0] * m_M2[0]) - 3.0;
+}
+
+RunningStatsSOA operator+(const RunningStatsSOA a, const RunningStatsSOA b) {
+    RunningStatsSOA combined;
+
+    /*combined.m_n[0] = a.m_n[0] + b.n;
+
+    double delta = b.M1 - a.M1;
+    double delta2 = delta * delta;
+    double delta3 = delta * delta2;
+    double delta4 = delta2 * delta2;
+
+    combined.M1 = (a.n * a.M1 + b.n * b.M1) / combined.n;
+
+    combined.M2 = a.M2 + b.M2 +
+        delta2 * a.n * b.n / combined.n;
+
+    combined.M3 = a.M3 + b.M3 +
+        delta3 * a.n * b.n * (a.n - b.n) / (combined.n * combined.n);
+    combined.M3 += 3.0 * delta * (a.n * b.M2 - b.n * a.M2) / combined.n;
+
+    combined.M4 = a.M4 + b.M4 + delta4 * a.n * b.n * (a.n * a.n - a.n * b.n + b.n * b.n) /
+        (combined.n * combined.n * combined.n);
+    combined.M4 += 6.0 * delta2 * (a.n * a.n * b.M2 + b.n * b.n * a.M2) / (combined.n * combined.n) +
+        4.0 * delta * (a.n * b.M3 - b.n * a.M3) / combined.n;*/
+
+    return combined;
+}
+
+RunningStatsSOA& RunningStatsSOA::operator+=(const RunningStatsSOA& rhs) {
+    RunningStatsSOA combined = *this + rhs;
     *this = combined;
     return *this;
 }

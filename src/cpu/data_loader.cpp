@@ -33,10 +33,10 @@ std::vector<double> load_data(const std::filesystem::path& path) {
 	}
 
 	std::wcout << L"Read " << numbers.size() << L" doubles" << std::endl;
-	for (std::size_t i = 0; i < file_size / sizeof(double); ++i) {
+	/*for (std::size_t i = 0; i < file_size / sizeof(double); ++i) {
 		std::wcout << numbers[i] << '\n';
 	}
-	std::wcout << std::endl;
+	std::wcout << std::endl;*/
 
 	return numbers;
 }
