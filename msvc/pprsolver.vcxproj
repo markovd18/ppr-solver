@@ -19,13 +19,31 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\cpu\characteristics_calculator.cpp" />
+    <ClCompile Include="..\src\benchmark.cpp" />
+    <ClCompile Include="..\src\calculator_factory.cpp" />
+    <ClCompile Include="..\src\cpu\cpu_statistics.cpp" />
+    <ClCompile Include="..\src\cpu\statistics.cpp" />
     <ClCompile Include="..\src\cpu\data_loader.cpp" />
+    <ClCompile Include="..\src\input_parser.cpp" />
     <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\cpu\distribution.cpp" />
+    <ClCompile Include="..\src\ocl\ocl_statistics.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\characteristics_calculator.h" />
+    <ClInclude Include="..\include\benchmark.h" />
+    <ClInclude Include="..\include\calculator_factory.h" />
+    <ClInclude Include="..\include\cpu\cpu_statistics.h" />
+    <ClInclude Include="..\include\ocl\opencl.h" />
+    <ClInclude Include="..\include\statistics.h" />
+    <ClInclude Include="..\include\cpu\distribution.h" />
     <ClInclude Include="..\include\data_loader.h" />
+    <ClInclude Include="..\include\input_parser.h" />
+    <ClInclude Include="..\include\ocl\ocl_statistics.h" />
+    <ClInclude Include="..\include\platform.h" />
+    <ClInclude Include="..\include\util\string.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\src\ocl\kernel.cl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -84,6 +102,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>..\compiled\</OutDir>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -100,11 +120,14 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(OCL_ROOT)\include;$(ProjectDir)\..\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(OCL_ROOT)\lib\OpenCL.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OCL_ROOT)\bin</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -133,12 +156,15 @@
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
       <AdditionalOptions>/Qvec-report:2 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(OCL_ROOT)\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(OCL_ROOT)\lib\OpenCL.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OCL_ROOT)\bin</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

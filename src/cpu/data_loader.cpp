@@ -3,7 +3,7 @@
 #include <fstream>
 #include <iostream>
 
-#include "../../include/data_loader.h"
+#include <data_loader.h>
 
 std::vector<double> load_data(const std::filesystem::path& path) {
 	std::wcout << path;

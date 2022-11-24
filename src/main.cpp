@@ -1,233 +1,86 @@
+#define CL_HPP_ENABLE_EXCEPTIONS
+#define CL_HPP_TARGET_OPENCL_VERSION  200
+
+
 #include <iostream>
 #include <chrono>
 #include <array>
 #include <algorithm>
 #include <future>
+#include <string>
+#include <CL/opencl.hpp>
+#include <cstdlib>
+#include <execution>
+#include <numeric>
 
-#include "../include/data_loader.h"
-#include "../include/characteristics_calculator.h"
-
-struct SIntermediate_Result {
-	double M1 = 0;
-	double M2 = 0;
-	double M3 = 0;
-	double M4 = 0;
-	double n = 0;
-};
-
-SIntermediate_Result merge_intermadiate_results(const SIntermediate_Result a, const SIntermediate_Result b) {
-	SIntermediate_Result result;
-
-	result.n = a.n + b.n;
-
-	const double delta = b.M1 - a.M1;
-	const double delta2 = delta * delta;
-	const double delta3 = delta * delta2;
-	const double delta4 = delta2 * delta2;
-
-	result.M1 = (a.n * a.M1 + b.n * b.M1) / result.n;
-
-	result.M2 = a.M2 + b.M2 +
-		delta2 * a.n * b.n / result.n;
-
-	result.M3 = a.M3 + b.M3 +
-		delta3 * a.n * b.n * (a.n - b.n) / (result.n * result.n);
-	result.M3 += 3.0 * delta * (a.n * b.M2 - b.n * a.M2) / result.n;
-
-	result.M4 = a.M4 + b.M4 + delta4 * a.n * b.n * (a.n * a.n - a.n * b.n + b.n * b.n) /
-		(result.n * result.n * result.n);
-	result.M4 += 6.0 * delta2 * (a.n * a.n * b.M2 + b.n * b.n * a.M2) / (result.n * result.n) +
-		4.0 * delta * (a.n * b.M3 - b.n * a.M3) / result.n;
-
-	return result;
-}
-
+#include <input_parser.h>
+#include <data_loader.h>
+#include <statistics.h>
+#include <cpu/distribution.h>
+#include <benchmark.h>
+#include <calculator_factory.h>
+#include <cpu/cpu_statistics.h>
 
 int wmain(int argc, wchar_t** argv) {
-
-	const auto numbers = load_data("../referencni_rozdeleni/gauss_large");
-	RunningStats stats;
-
-	//auto start = std::chrono::high_resolution_clock::now();
-	//for (const auto& number : numbers) {
-	//	stats.Push(number);
-	//}
-	////auto end = std::chrono::high_resolution_clock::now();
-	////auto diff = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-
-	////std::wcout << L"Sequential duration: " << diff.count() << L"us\n";
-	//std::wcout << L"Kurtosis: " << stats.Kurtosis() << std::endl;
-	//std::wcout << L"Mean: " << stats.Mean() << std::endl;
-
-	//stats.Clear();
-
-	//start = std::chrono::high_resolution_clock::now();
-
-	////stats.Push_Vector(numbers);
-
-	//end = std::chrono::high_resolution_clock::now();
-	//diff = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-
-	//std::wcout << L"Batch duration: " << diff.count() << L"us\n";
-
-	//RunningStats stats_1;
-	//RunningStats stats_2;
-	//RunningStats stats_3;
-	//RunningStats stats_4;
-
-	//start = std::chrono::high_resolution_clock::now();
-	////for (std::size_t i = 0; i < numbers.size(); i += 4) {
-	////	// TODO tady podle mì musí být velký forloop vnì
-	////	// a vnoøený forloop += 4, který vektorizuje jen výpoèet delty 1
-	////	// z 
-	////	stats_1.Push(numbers[i]);
-	////	stats_2.Push(numbers[i + 1]);
-	////	stats_3.Push(numbers[i + 2]);
-	////	stats_4.Push(numbers[i + 3]);
-	////}
-
-	//const auto result = stats_1 + stats_2 + stats_3 + stats_4;
-	//end = std::chrono::high_resolution_clock::now();
-	//diff = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-
-	//std::wcout << L"Parallel duration: " << diff.count() << L"us\n";
-
-	//for (const auto stats : { &stats_1, &stats_2, &stats_3, &stats_4 }) {
-	//	stats->Clear();
-	//}
-
-	//
-
-	////for (const double number : numbers) {
-	////	double delta, delta_n, delta_n2, term1 = 0;
-	////	const double n1 = stats_1.n;
-	////	const double n2 = stats_1.n + 1;
-	////	// vektorizovat urèitì tohle
-	////	// teoreticky by šel každej krok rozdìlit na batche a dìlat ve forloopu po 4 a pøekladaè to snad pochopí
-	////	delta = number - stats_1.M1;
-	////	delta_n = delta / n2;
-	////	delta_n2 = delta_n * delta_n;
-	////	term1 = delta * delta_n * n1;
-	////	stats_1.M1 += delta_n;
-	////	stats_1.M4 += term1 * delta_n2 * (n2 * n2 - 3.0 * n2 + 3.0) + 6.0 * delta_n2 * stats_1.M2 - 4.0 * delta_n * stats_1.M3;
-	////	stats_1.M3 += term1 * delta_n * (n2 - 2.0) - 3.0 * delta_n * stats_1.M2;
-	////	stats_1.M2 += term1;
-
-	////	stats_1.n = n2;
-	////}
-
-	//for (std::size_t i = 0; i < numbers.size(); i += 4) {
-	//	std::array<double, 4> deltas;
-	//	const auto modular = i % 4;
-	//	deltas[modular] = numbers[i] - stats_1.M1;
-	//	deltas[modular + 1] = numbers[i + 1] - stats_1.M1;
-	//	deltas[modular + 2] = numbers[i + 2] - stats_1.M1;
-	//	deltas[modular + 3] = numbers[i + 3] - stats_1.M1;
-	//}
-
-	///*std::vector<double> deltas;
-	//deltas.resize(numbers.size());
-
-	//const auto M1 = stats_1.M1;
-	//for (std::size_t i = 0; i < numbers.size(); ++i) {
-	//	deltas[i] = numbers[i] - M1;
-	//}*/
-
-	//std::vector<double> B, A;
-	//B.resize(numbers.size());
-	//A.resize(numbers.size());
-
-	//for (int i = 0; i < 1000; ++i)
-	//{
-	//	const double x = B[i];
-	//	A[i] = A[i] + x;
-	//}
-
-	RunningStatsSOA soa_stats;
-	static const std::size_t count = 64;
-	std::array<double, count> n{ 0 }/* = soa_stats.m_n*/;
-	//n.resize(64);
-	std::array<double, count> M1{ 0 }/* = soa_stats.m_M1*/;
-	std::array<double, count> M2{ 0 }/* = soa_stats.m_M2*/;
-	std::array<double, count> M3{ 0 } /*= soa_stats.m_M3*/;
-	std::array<double, count> M4{ 0 } /*= soa_stats.m_M4*/;
-
-	auto start = std::chrono::high_resolution_clock::now();
-
-	for (std::size_t j = 0; j < numbers.size(); j += count) {
-
-		for (std::size_t i = 0; i < count; ++i) {
-			const auto n1 = n[i];
-			const auto n2 = n1 + 1;
-
-			const double delta = numbers[j + i] - M1[i];
-			const double delta_n = delta / n2;
-			const double delta_n2 = delta_n * delta_n;
-			const double term1 = delta * delta_n * n1;
-
-			M1[i] += delta_n;
-			M4[i] += term1 * delta_n2 * (n2 * n2 - 3 * n2 + 3) + 6 * delta_n2 * M2[i] - 4 * delta_n * M3[i];
-			M3[i] += term1 * delta_n * (n2 - 2) - 3 * delta_n * M2[i];
-			M2[i] += term1;
-
-			n[i] = n2;
-		}
+	const auto parse_result = parse_input_params(argc, argv);
+	if (parse_result.Has_Error()) {
+		std::wcout << parse_result.Error_Message() << std::endl;
+		return EXIT_FAILURE;
+		// TODO print usage
 	}
 
-	std::vector<std::future<SIntermediate_Result>> futures;
-	futures.reserve(count / 2);
-	std::vector<SIntermediate_Result> results;
-	results.reserve(count / 2);
+	const auto& input_params = parse_result.Input_Params();
+	const auto numbers = load_data(input_params.file_path);
+	// TODO vymazat nevalidni data pres std::fp_classify a udelat boolean flag, jestli muze/nemuze byt poisson
 
-	{
-		// TODO jses kunda musis vytvorit vsechny a ne jen dva
-		const SIntermediate_Result a{ M1[0], M2[0], M3[0], M4[0], n[0] };
-		const SIntermediate_Result b{ M1[1], M2[1], M3[1], M4[1], n[1] };
+	const auto calculator_ptr = create_statistics_calculator(input_params.platform);
+	const auto statistics = calculator_ptr->Analyze_Vector(numbers);
 
-		results.push_back(a);
-		results.push_back(b);
-	}
+	if (input_params.platform.type == EPlatform_Type::OPEN_CL) {
+		try {
+			std::vector<cl::Platform> platforms;
+			cl::Platform::get(&platforms);
+			cl::Platform plat;
 
-	while (results.size() >= 2) {	// TODO vzdycky po dvou, muze zbyt jeden, tak ten prohlasit za merged / finalni vysledek
-		while (results.size() >= 2 && !results.empty()) {
-			const auto a = results.back();
-			results.pop_back();
-			const auto b = results.back();
-			results.pop_back();
+			for (auto& platform : platforms) {
+				std::vector<cl::Device> devices;
+				platform.getDevices(CL_DEVICE_TYPE_GPU | CL_DEVICE_TYPE_CPU, &devices);
 
-			futures.push_back(std::async(std::launch::async, merge_intermadiate_results, a, b));
+				//std::find_if(devices.begin(), devices.end(), [](const cl::Device& device) { return device.getInfo<CL_DEVICE_NAME>() == "ahoj";  });
+				for (auto& device : devices) {
+					auto desc = device.getInfo<CL_DEVICE_NAME>();
+					std::cout << "Testuji zarizeni " << desc << " na platforme " << platform.getInfo<CL_PLATFORM_NAME>() << "...\n";
+				}
+			}
+		} catch (const cl::Error& err) {
+			std::cerr << "Chyba: " << err.what() << "(" << err.err() << ")\n";
+			return EXIT_FAILURE;
 		}
 
-		auto& future = futures.back();
-		while (!futures.empty()) {
-			const auto result = future.get();
-			results.push_back(result);
-
-			futures.pop_back();
-		}
+		return EXIT_SUCCESS;
 	}
 
+	cpu::CSeq_Stats_Calculator seq_calc;
+	cpu::CPar_Stats_Calculator par_calc;
 
-	auto end = std::chrono::high_resolution_clock::now();
-	auto diff = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+	CStatistics seq_stats;
+	CStatistics par_stats;
 
-	std::wcout << L"Vectorized 64 duration: " << diff.count() << L"us\n";
+	stats::benchmark_function(L"Sequential algorithm", 
+							  [&numbers, &seq_calc, &seq_stats]() { seq_stats = seq_calc.Analyze_Vector(numbers);  });
+	std::wcout << L"Sequential kurtosis: " << seq_stats.Kurtosis() << L"\n";
+	const dist::EDistribution calculated_distribution_seq = dist::evaluate_distribution(seq_stats.Kurtosis(), seq_stats.Mean());
+	std::wcout << L"Determined distribution: " << dist::get_distribution_name(calculated_distribution_seq) << std::endl;
 
-	stats.Clear();
+	std::wcout << std::endl;
 
-	start = std::chrono::high_resolution_clock::now();
+	stats::benchmark_function(L"Parallel algorithm", 
+							  [&numbers, &par_calc, &par_stats]() { par_stats = par_calc.Analyze_Vector(numbers);  });
+	std::wcout << L"Parallel kurtosis: " << par_stats.Kurtosis() << L"\n";
+	const dist::EDistribution calculated_distribution_par = dist::evaluate_distribution(par_stats.Kurtosis(), par_stats.Mean());
+	std::wcout << L"Determined distribution: " << dist::get_distribution_name(calculated_distribution_par) << L"\n";
 
-	for (const auto& number : numbers) {
-		stats.Push(number);
-	}
-
-	end = std::chrono::high_resolution_clock::now();
-	diff = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-
-	std::wcout << L"Sequential 64 duration: " << diff.count() << L"us\n";
-	std::wcout << L"Sequential 64 kurtosis: " << stats.Kurtosis() << L"\n";
-	std::wcout << L"Sequential 64 kurtosis: " << stats.NumDataValues() << L"\n";
-
-
-	return 0;
+	std::wcout << std::endl;
+	
+	return EXIT_SUCCESS;
 }

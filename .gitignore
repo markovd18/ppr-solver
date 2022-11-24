@@ -10,3 +10,6 @@ vzorove odevzdani.zip
 *.obj
 *.pdb
 src/*.nativecodeanalysis*
+*.log
+referencni_rozdeleni
+
