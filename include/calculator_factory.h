@@ -1,6 +1,9 @@
 #pragma once
 
 #include <statistics.h>
+#include <platform.h>
+
+#include <vector>
 #include <memory>
 
 class CStatistics_Calculator {

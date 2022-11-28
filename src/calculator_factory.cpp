@@ -1,5 +1,6 @@
 #include <memory>
 
+#include <platform.h>
 #include <ocl/ocl_statistics.h>
 #include <cpu/cpu_statistics.h>
 #include <calculator_factory.h>
