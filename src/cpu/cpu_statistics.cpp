@@ -6,10 +6,13 @@
 #include <cpu/cpu_statistics.h>
 #include <statistics.h>
 #include <benchmark.h>
+#include <env.h>
 
 namespace cpu {
 
 	CStatistics CSeq_Stats_Calculator::Analyze_Vector(const std::vector<double>& data) {
+		double m_n = 0.0, m_M1 = 0.0, m_M2 = 0.0, m_M3 = 0.0, m_M4 = 0.0;
+
 		for (const auto& x : data) {
 			double delta, delta_n, delta_n2, term1;
 
@@ -33,14 +36,14 @@ namespace cpu {
 	CStatistics CPar_Stats_Calculator::Analyze_Vector(const std::vector<double>& numbers) {
 		CStatistics result;
 
-		static const std::size_t count = 64;
+		static const std::size_t count = env::s_stream_size;
 		std::array<double, count> n{ 0 };
 		std::array<double, count> M1{ 0 };
 		std::array<double, count> M2{ 0 };
 		std::array<double, count> M3{ 0 };
 		std::array<double, count> M4{ 0 };
 
-		stats::benchmark_function(L"Vectorized algorithm", [&numbers, &n, &M1, &M2, &M3, &M4]() {
+		//stats::benchmark_function(L"Vectorized algorithm", [&numbers, &n, &M1, &M2, &M3, &M4]() {
 			for (std::size_t j = 0; (j + count) < numbers.size(); j += count) {
 
 				for (std::size_t i = 0; i < count; ++i) {
@@ -60,50 +63,19 @@ namespace cpu {
 					n[i] = n2;
 				}
 			}
-								  });
-
-		std::vector<CStatistics> results;
-		results.resize(count);
-		for (std::size_t i = 0; i < count; i++) {
-			// TODO 1305 - je to struktura a to se mu nelibi, asi nepujde zvektorizovat
-			results[i] = CStatistics(n[i], M1[i], M2[i], M3[i], M4[i]);
-		}
-
-		//std::vector<std::future<SIntermediate_Result>> futures;
-		//futures.reserve(count / 2);
-
-		//stats::benchmark_function(L"Vectorized merge", [&results, &futures]() {
-		//	while (results.size() >= 2) {
-		//		while (results.size() >= 2 && !results.empty()) {
-		//			const auto& a = *(results.end() - 1);
-		//			const auto& b = *(results.end() - 2);
-
-		//			futures.emplace_back(std::async(std::launch::async, merge_intermadiate_results, a, b));
-		//			results.pop_back();
-		//			results.pop_back();
-		//		}
-
-		//		while (!futures.empty()) {
-		//			auto& future = futures.back();
-		//			results.emplace_back(std::move(future.get()));
-
-		//			futures.pop_back();
-		//		}
-		//	}
 		//});
 
-		//result = results.front();
+		std::vector<CStatistics> results(count);
+		//stats::benchmark_function(L"CStatistics objects creation", [&results, &n, &M1, &M2, &M3, &M4]() {
+			for (std::size_t i = 0; i < count; i++) {
+				// TODO 1305 - je to struktura a to se mu nelibi, asi nepujde zvektorizovat
+				results[i] = CStatistics(n[i], M1[i], M2[i], M3[i], M4[i]);
+			}
+		//});
 
-		//results.clear();
-		//results.resize(count);
-		//for (std::size_t i = 0; i < count; i++) {
-		//	// TODO 1305 - je to struktura a to se mu nelibi, asi nepujde zvektorizovat
-		//	results[i] = { M1[i], M2[i], M3[i], M4[i], n[i] };
-		//}
-
-		stats::benchmark_function(L"Paralel reduce merge", [&results, &result]() {
+		//stats::benchmark_function(L"Paralel reduce merge", [&results, &result]() {
 			result = std::reduce(std::execution::par, results.cbegin(), results.cend());
-								  });
+		//});
 
 		return result;
 	}

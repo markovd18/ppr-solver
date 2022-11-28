@@ -77,10 +77,8 @@
     <ClInclude Include="..\include\cpu\cpu_statistics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\src\ocl\kernel.cl">
-      <Filter>Source Files</Filter>
-    </None>
+    <ClInclude Include="..\include\env.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

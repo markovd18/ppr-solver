@@ -22,7 +22,7 @@ double dist::get_distribution_kurtosis(const EDistribution distribution, const d
     switch (distribution) {
         case EXPONENTIAL: return 6.0;
         case UNIFORM: return -(6.0 / 5.0);
-        case POISSON: return (1.0 / mean);  // can division by zero occur??
+        case POISSON: return (1.0 / mean);
         case GAUSS: return 0.0;
         default: return -1.0; // TODO default error state??
     }

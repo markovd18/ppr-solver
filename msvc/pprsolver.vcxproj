@@ -33,6 +33,7 @@
     <ClInclude Include="..\include\benchmark.h" />
     <ClInclude Include="..\include\calculator_factory.h" />
     <ClInclude Include="..\include\cpu\cpu_statistics.h" />
+    <ClInclude Include="..\include\env.h" />
     <ClInclude Include="..\include\ocl\opencl.h" />
     <ClInclude Include="..\include\statistics.h" />
     <ClInclude Include="..\include\cpu\distribution.h" />
@@ -41,9 +42,6 @@
     <ClInclude Include="..\include\ocl\ocl_statistics.h" />
     <ClInclude Include="..\include\platform.h" />
     <ClInclude Include="..\include\util\string.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\src\ocl\kernel.cl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

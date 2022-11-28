@@ -9,7 +9,6 @@ std::unique_ptr<CStatistics_Calculator> create_statistics_calculator(const SPlat
         return std::make_unique<ocl::COCL_Stats_Calculator>(platform.args);
     }
 
-    // TODO SMP
     if (platform.type == EPlatform_Type::SMP) {
         return std::make_unique<cpu::CPar_Stats_Calculator>();
     }

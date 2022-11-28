@@ -13,7 +13,7 @@ namespace dist {
 
 	std::wstring get_distribution_name(const EDistribution distribution);
 
-	double get_distribution_kurtosis(const EDistribution distribution, const double mean);	// TODO tady idealne intermedeate_result
+	double get_distribution_kurtosis(const EDistribution distribution, const double mean);
 
-	EDistribution evaluate_distribution(const double kurtosis, const double mean); // TODO tady idealne intermedeate_result
+	EDistribution evaluate_distribution(const double kurtosis, const double mean);
 }
