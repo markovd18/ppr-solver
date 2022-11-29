@@ -8,7 +8,7 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>../referencni_rozdeleni/poisson SMP</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>../referencni_rozdeleni/poisson gfx90c</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerEnvironment>$(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
   </PropertyGroup>

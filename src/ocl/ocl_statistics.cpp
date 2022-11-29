@@ -9,6 +9,7 @@
 #include <ocl/ocl_statistics.h>
 #include <util/string.h>
 #include <data_loader.h>
+#include <env.h>
 
 namespace ocl {
 
@@ -146,10 +147,10 @@ namespace ocl {
             throw std::runtime_error("Error while building OpenCL program: " + errors);
         }
 
-        cl::Kernel sum_kernel(program, "sum_kernel");
+        cl::Kernel sum_kernel(program, "new_sum_kernel");
         cl::Kernel reduce_kernel(program, "reduce_kernel");
         
-        static const std::size_t count = 256;
+        static const std::size_t count = env::s_stream_size;
         const std::size_t group_count = std::ceil(data.size() / double(count));
         
         std::vector<double> result_n(data.size());

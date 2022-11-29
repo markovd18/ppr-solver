@@ -20,12 +20,12 @@ void reduce_work_group(double* local_n,
     while (dist > 1) {
         dist >>= 1;
         if (local_id < dist) {
-            uint other_id = id + dist;
+            uint other_id = local_id + dist;
             
             double prev_n = local_n[local_id];
             double new_n = prev_n + local_n[other_id];
-            // if (id == 0) {
-             //   printf("local ID: %d, other ID: %d, old n: %d, other n: %d, new n: %d", id, other_id, prev_n, local_n[other_id], new_n);
+            // if (local_id == 0) {
+            //    printf("group: %d - local ID: %d, other ID: %d, old n: %f, other n: %f, new n: %f",work_group_id, id, other_id, prev_n, local_n[other_id], new_n);
             //}
             double delta = local_M1[local_id] - local_M1[other_id];
             double delta2 = delta * delta;
@@ -33,9 +33,11 @@ void reduce_work_group(double* local_n,
             double delta4 = delta2 * delta2;
 
             local_M1[local_id] = (local_n[other_id] * local_M1[other_id] + prev_n * local_M1[local_id]) / new_n;
-
+            if (id == 0) {
+                printf("group: %d, id: %d - old M2: %f, other M2: %f", work_group_id, local_id, local_M2[local_id], local_M2[other_id]);
+            }
             local_M2[local_id] = local_M2[other_id] + local_M2[local_id] + delta2 * local_n[other_id] * prev_n / new_n;
-
+            
             local_M3[local_id] = local_M3[other_id] + local_M3[local_id] + 
                 delta3 * local_n[other_id] * prev_n * (local_n[other_id] * prev_n) / (new_n * new_n);
 
@@ -52,17 +54,71 @@ void reduce_work_group(double* local_n,
             local_n[local_id] = new_n; 
         }
 
-        // barrier(CLK_GLOBAL_MEM_FENCE);
+        barrier(CLK_LOCAL_MEM_FENCE);
     }
 
     if (local_id == 0) {
-        // printf("n: %d, M1: %d, M2: %d, M3: %d, M4: %d\n", local_n[local_id], local_M1[local_id], local_M2[local_id], local_M3[local_id], local_M4[local_id]);
         result_n[work_group_id] = local_n[local_id];
         result_M1[work_group_id] = local_M1[local_id];
         result_M2[work_group_id] = local_M2[local_id];
         result_M3[work_group_id] = local_M3[local_id];
         result_M4[work_group_id] = local_M4[local_id];
+        //printf("group %d - n: %f, M1: %f, M2: %f, M3: %f, M4: %lf\n", work_group_id, result_n[work_group_id], result_M1[work_group_id], result_M2[work_group_id], result_M3[work_group_id], result_M4[work_group_id]);
     }                
+}
+
+__kernel __attribute__((reqd_work_group_size(LOCAL_GROUP_XDIM, 1, 1))) 
+void new_sum_kernel(__global const double* numbers,
+                    __global double* g_n,
+                    __global double* g_M1,
+                    __global double* g_M2,
+                    __global double* g_M3,
+                    __global double* g_M4) {
+    uint local_id = get_local_id(0);
+    uint id = get_global_id(0);
+    uint work_group_id = get_group_id(0);
+
+    __local double n[LOCAL_GROUP_XDIM]; 
+    __local double M1[LOCAL_GROUP_XDIM]; 
+    __local double M2[LOCAL_GROUP_XDIM];
+    __local double M3[LOCAL_GROUP_XDIM];
+    __local double M4[LOCAL_GROUP_XDIM];
+
+    n[local_id] = 1;
+    M1[local_id] = numbers[id];
+
+    uint dist = LOCAL_GROUP_XDIM;   // get_local_size(0)
+    while (dist > 1) {
+        dist >>= 1;
+        if (local_id < dist) {
+            uint other_id = local_id + dist;
+
+            uint n1 = n[other_id];
+            uint n2 = n1 + 1;
+
+            double delta = numbers[id + other_id] - M1[local_id];
+            double delta_n = delta / n2;
+            double delta_n2 = delta_n * delta_n;
+            double term1 = delta * delta_n * n1;
+
+            M1[local_id] += delta_n;
+
+            M4[local_id] += term1 * delta_n2 * (n2 * n2 - 3 * n2 + 3) + 6 * delta_n2 * M2[local_id] - 4 * delta_n * M3[local_id];
+            M3[local_id] += term1 * delta_n * (n2 - 2) - 3 * delta_n * M2[local_id];
+            M2[local_id] += term1;
+            n[local_id] = n2;
+        }
+
+        barrier(CLK_LOCAL_MEM_FENCE);
+    }
+
+     if (local_id == 0) {
+        g_n[work_group_id] = n[local_id];
+        g_M1[work_group_id] = M1[local_id];
+        g_M2[work_group_id] = M2[local_id];
+        g_M3[work_group_id] = M3[local_id];
+        g_M4[work_group_id] = M4[local_id];
+    } 
 }
 
 __kernel __attribute__((reqd_work_group_size(LOCAL_GROUP_XDIM, 1, 1))) 
@@ -102,7 +158,7 @@ void sum_kernel(__global const double* numbers,
     barrier(CLK_LOCAL_MEM_FENCE);
     // if (local_id == 0) {
         // printf("local N: %d\n", g_n[local_id]);
-    // }
+    // 
     reduce_work_group(n, M1, M2, M3, M4, g_n, g_M1, g_M2, g_M3, g_M4);
 }
 
