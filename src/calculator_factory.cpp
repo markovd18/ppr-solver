@@ -1,9 +1,9 @@
 #include <memory>
 
-#include <platform.h>
-#include <ocl/ocl_statistics.h>
-#include <cpu/cpu_statistics.h>
-#include <calculator_factory.h>
+#include "../include/platform.h"
+#include "../include/ocl/ocl_statistics.h"
+#include "../include/cpu/cpu_statistics.h"
+#include "../include/calculator_factory.h"
 
 std::unique_ptr<CStatistics_Calculator> create_statistics_calculator(const SPlatform& platform) {
     if (platform.type == EPlatform_Type::OPEN_CL) {

@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include <ocl/opencl.h>
-#include <calculator_factory.h>
+#include "../../include/ocl/opencl.h"
+#include "../../include/calculator_factory.h"
 
 namespace ocl {
 

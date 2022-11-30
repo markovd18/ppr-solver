@@ -3,7 +3,7 @@
 #include <fstream>
 #include <iostream>
 
-#include <data_loader.h>
+#include "../../include/data_loader.h"
 
 std::vector<double> load_data(const std::filesystem::path& path) {
 	if (!std::filesystem::exists(path) || std::filesystem::is_directory(path)) {

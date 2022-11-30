@@ -154,7 +154,7 @@
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
       <AdditionalOptions>/Qvec-report:2 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(OCL_ROOT)\include;$(ProjectDir)\..\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OCL_ROOT)\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

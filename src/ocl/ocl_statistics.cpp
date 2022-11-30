@@ -1,4 +1,3 @@
-#include <ocl/opencl.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -6,10 +5,12 @@
 #include <vector>
 #include <filesystem>
 
-#include <ocl/ocl_statistics.h>
-#include <util/string.h>
-#include <data_loader.h>
-#include <env.h>
+#include "../../include/ocl/opencl.h"
+#include "../../include/ocl/ocl_statistics.h"
+#include "../../include/util/string.h"
+#include "../../include/data_loader.h"
+#include "../../include/env.h"
+#include "../../include/statistics.h"
 
 namespace ocl {
 
@@ -151,7 +152,6 @@ namespace ocl {
         cl::Kernel reduce_kernel(program, "reduce_kernel");
         
         static const std::size_t count = env::s_stream_size;
-        const std::size_t group_count = std::ceil(data.size() / double(count));
         
         std::vector<double> result_n(data.size());
         std::vector<double> result_M1(data.size());

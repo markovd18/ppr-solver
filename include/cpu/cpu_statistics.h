@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include <calculator_factory.h>
-#include <statistics.h>
+#include "../../include/calculator_factory.h"
+#include "../../include/statistics.h"
 
 namespace cpu {
 

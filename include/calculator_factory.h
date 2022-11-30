@@ -1,7 +1,8 @@
 #pragma once
 
-#include <statistics.h>
-#include <platform.h>
+#include "../include/statistics.h"
+#include "../include/platform.h"
+
 
 #include <vector>
 #include <memory>

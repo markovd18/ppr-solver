@@ -5,7 +5,7 @@
 #include <filesystem>
 #include <vector>
 
-#include <platform.h>
+#include "../include/platform.h"
 
 struct SInput_Params {
 	const std::filesystem::path file_path;

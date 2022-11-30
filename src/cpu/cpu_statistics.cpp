@@ -3,10 +3,10 @@
 #include <execution>
 #include <numeric>
 
-#include <cpu/cpu_statistics.h>
-#include <statistics.h>
-#include <benchmark.h>
-#include <env.h>
+#include "../../include/cpu/cpu_statistics.h"
+#include "../../include/statistics.h"
+#include "../../include/benchmark.h"
+#include "../../include/env.h"
 
 namespace cpu {
 
