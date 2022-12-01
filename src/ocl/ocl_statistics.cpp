@@ -5,12 +5,12 @@
 #include <vector>
 #include <filesystem>
 
-#include "../../include/ocl/opencl.h"
-#include "../../include/ocl/ocl_statistics.h"
-#include "../../include/util/string.h"
-#include "../../include/data_loader.h"
-#include "../../include/env.h"
-#include "../../include/statistics.h"
+#include "../include/ocl/opencl.h"
+#include "../include/ocl/ocl_statistics.h"
+#include "../include/util/string.h"
+#include "../include/data_loader.h"
+#include "../include/env.h"
+#include "../include/statistics.h"
 
 namespace ocl {
 

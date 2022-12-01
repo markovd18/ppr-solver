@@ -44,40 +44,40 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\data_loader.h">
+    <ClInclude Include="..\src\include\data_loader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\statistics.h">
+    <ClInclude Include="..\src\include\statistics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\cpu\distribution.h">
+    <ClInclude Include="..\src\include\cpu\distribution.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\input_parser.h">
+    <ClInclude Include="..\src\include\input_parser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\benchmark.h">
+    <ClInclude Include="..\src\include\benchmark.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\ocl\ocl_statistics.h">
+    <ClInclude Include="..\src\include\ocl\ocl_statistics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\platform.h">
+    <ClInclude Include="..\src\include\platform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\util\string.h">
+    <ClInclude Include="..\src\include\util\string.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\ocl\opencl.h">
+    <ClInclude Include="..\src\include\ocl\opencl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\calculator_factory.h">
+    <ClInclude Include="..\src\include\calculator_factory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\cpu\cpu_statistics.h">
+    <ClInclude Include="..\src\include\cpu\cpu_statistics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\env.h">
+    <ClInclude Include="..\src\include\env.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

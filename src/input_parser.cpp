@@ -1,8 +1,8 @@
 #include <string>
 #include <cstdint>
 
-#include "../include/platform.h"
-#include "../include/input_parser.h"
+#include "include/platform.h"
+#include "include/input_parser.h"
 
 static const std::size_t REQUIRED_ARGS_COUNT = 3;
 static const std::size_t INPUT_FILE_ARG_INDEX = 1;

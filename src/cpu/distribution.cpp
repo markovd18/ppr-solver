@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <string>
 
-#include "../../include/cpu/distribution.h"
+#include "../include/cpu/distribution.h"
 
 std::wstring dist::get_distribution_name(const dist::EDistribution distribution) {
     switch (distribution) {

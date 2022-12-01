@@ -13,14 +13,14 @@
 #include <execution>
 #include <numeric>
 
-#include "../include/input_parser.h"
-#include "../include/data_loader.h"
-#include "../include/statistics.h"
-#include "../include/cpu/distribution.h"
-#include "../include/benchmark.h"
-#include "../include/calculator_factory.h"
-#include "../include/cpu/cpu_statistics.h"
-#include "../include/env.h"
+#include "include/input_parser.h"
+#include "include/data_loader.h"
+#include "include/statistics.h"
+#include "include/cpu/distribution.h"
+#include "include/benchmark.h"
+#include "include/calculator_factory.h"
+#include "include/cpu/cpu_statistics.h"
+#include "include/env.h"
 
 void print_all_ocl_devices() {
 	try {

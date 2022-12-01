@@ -30,18 +30,18 @@
     <ClCompile Include="..\src\ocl\ocl_statistics.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\benchmark.h" />
-    <ClInclude Include="..\include\calculator_factory.h" />
-    <ClInclude Include="..\include\cpu\cpu_statistics.h" />
-    <ClInclude Include="..\include\env.h" />
-    <ClInclude Include="..\include\ocl\opencl.h" />
-    <ClInclude Include="..\include\statistics.h" />
-    <ClInclude Include="..\include\cpu\distribution.h" />
-    <ClInclude Include="..\include\data_loader.h" />
-    <ClInclude Include="..\include\input_parser.h" />
-    <ClInclude Include="..\include\ocl\ocl_statistics.h" />
-    <ClInclude Include="..\include\platform.h" />
-    <ClInclude Include="..\include\util\string.h" />
+    <ClInclude Include="..\src\include\benchmark.h" />
+    <ClInclude Include="..\src\include\calculator_factory.h" />
+    <ClInclude Include="..\src\include\cpu\cpu_statistics.h" />
+    <ClInclude Include="..\src\include\env.h" />
+    <ClInclude Include="..\src\include\ocl\opencl.h" />
+    <ClInclude Include="..\src\include\statistics.h" />
+    <ClInclude Include="..\src\include\cpu\distribution.h" />
+    <ClInclude Include="..\src\include\data_loader.h" />
+    <ClInclude Include="..\src\include\input_parser.h" />
+    <ClInclude Include="..\src\include\ocl\ocl_statistics.h" />
+    <ClInclude Include="..\src\include\platform.h" />
+    <ClInclude Include="..\src\include\util\string.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

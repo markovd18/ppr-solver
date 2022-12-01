@@ -1,5 +1,5 @@
 
-#include "../../include/statistics.h"
+#include "../include/statistics.h"
 
 CStatistics::CStatistics(double n, double M1, double M2, double M3, double M4) 
     : m_n(n), m_M1(M1), m_M2(M2), m_M3(M3), m_M4(M4) {}
