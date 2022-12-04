@@ -149,7 +149,6 @@ namespace ocl {
         }
 
         cl::Kernel sum_kernel(program, "new_sum_kernel");
-        cl::Kernel reduce_kernel(program, "reduce_kernel");
         
         static const std::size_t count = env::s_stream_size;
         
@@ -159,32 +158,34 @@ namespace ocl {
         std::vector<double> result_M3(data.size());
         std::vector<double> result_M4(data.size());
 
+        std::wcout <<L"Sizeof data: " << sizeof(data) << std::endl;
         //buffery, se kterymi bude pracovat kernel
         cl::Buffer numbers_buffer{ 
             device_context, 
             CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
-            sizeof(data), const_cast<double*>(data.data())
+            data.size() * sizeof(double), const_cast<double*>(data.data())
         };
 
         
-        // TODO lok·lnÌ pamÏù na OCL se nechov· podle oËek·v·nÌ, nespr·vnÈ v˝sledky
         cl::Buffer n_buffer{ device_context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(result_n), result_n.data() };
         cl::Buffer M1_buffer{ device_context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(result_M1), result_M1.data() };
         cl::Buffer M2_buffer{ device_context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(result_M2), result_M2.data() };
         cl::Buffer M3_buffer{ device_context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(result_M3), result_M3.data() };
         cl::Buffer M4_buffer{ device_context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(result_M4), result_M4.data() };
-
+        
+        const auto number_count = static_cast<cl_double>(data.size());
         try {
             sum_kernel.setArg(0, numbers_buffer);
-            sum_kernel.setArg(1, n_buffer);
-            sum_kernel.setArg(2, M1_buffer);
-            sum_kernel.setArg(3, M2_buffer);
-            sum_kernel.setArg(4, M3_buffer);
-            sum_kernel.setArg(5, M4_buffer);
+            sum_kernel.setArg(1, number_count);
+            sum_kernel.setArg(2, n_buffer);
+            sum_kernel.setArg(3, M1_buffer);
+            sum_kernel.setArg(4, M2_buffer);
+            sum_kernel.setArg(5, M3_buffer);
+            sum_kernel.setArg(6, M4_buffer);
 
             cl::CommandQueue queue(device_context, device, 0);
 
-            queue.enqueueNDRangeKernel(sum_kernel, cl::NullRange, cl::NDRange(data.size()), cl::NDRange(count));
+            queue.enqueueNDRangeKernel(sum_kernel, cl::NullRange, cl::NDRange(count), cl::NDRange(count));
             queue.finish();
 
         } catch (const cl::Error& error) {
@@ -193,7 +194,7 @@ namespace ocl {
         }
        
         // TODO
-        return CStatistics(/*result_n, result_M1, result_M2, result_M3, result_M4*/);
+        return CStatistics(result_n[0], result_M1[0], result_M2[0], result_M3[0], result_M4[0]);
     }
 
 }
