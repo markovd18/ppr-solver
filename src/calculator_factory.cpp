@@ -11,7 +11,9 @@ std::unique_ptr<CStatistics_Calculator> create_statistics_calculator(const SPlat
     }
 
     if (platform.type == EPlatform_Type::SMP) {
+        //return std::make_unique<cpu::CSeq_Stats_Calculator>();
         return std::make_unique<cpu::CPar_Stats_Calculator>();
+
     }
 
     // TODO ALL

@@ -148,7 +148,7 @@ namespace ocl {
             throw std::runtime_error("Error while building OpenCL program: " + errors);
         }
 
-        cl::Kernel sum_kernel(program, "new_sum_kernel");
+        cl::Kernel kernel(program, "reduce_kernel");
         
         static const std::size_t count = env::s_stream_size;
         
@@ -158,8 +158,6 @@ namespace ocl {
         std::vector<double> result_M3(data.size());
         std::vector<double> result_M4(data.size());
 
-        std::wcout <<L"Sizeof data: " << sizeof(data) << std::endl;
-        //buffery, se kterymi bude pracovat kernel
         cl::Buffer numbers_buffer{ 
             device_context, 
             CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
@@ -175,17 +173,17 @@ namespace ocl {
         
         const auto number_count = static_cast<cl_double>(data.size());
         try {
-            sum_kernel.setArg(0, numbers_buffer);
-            sum_kernel.setArg(1, number_count);
-            sum_kernel.setArg(2, n_buffer);
-            sum_kernel.setArg(3, M1_buffer);
-            sum_kernel.setArg(4, M2_buffer);
-            sum_kernel.setArg(5, M3_buffer);
-            sum_kernel.setArg(6, M4_buffer);
+            kernel.setArg(0, numbers_buffer);
+            kernel.setArg(1, number_count);
+            kernel.setArg(2, n_buffer);
+            kernel.setArg(3, M1_buffer);
+            kernel.setArg(4, M2_buffer);
+            kernel.setArg(5, M3_buffer);
+            kernel.setArg(6, M4_buffer);
 
             cl::CommandQueue queue(device_context, device, 0);
 
-            queue.enqueueNDRangeKernel(sum_kernel, cl::NullRange, cl::NDRange(count), cl::NDRange(count));
+            queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(count), cl::NDRange(count));
             queue.finish();
 
         } catch (const cl::Error& error) {
