@@ -81,12 +81,6 @@ CStatistics collect_result(std::vector<CStatistics>& results) {
 	return std::reduce(std::execution::par, results.begin(), results.end());
 }
 
-void trim_buffer(std::vector<double>& buffer, const std::size_t max_size) {
-	if (buffer.size() > max_size) {
-		buffer.resize(max_size);
-	}
-}
-
 int wmain(int argc, wchar_t** argv) {
 	const auto parse_result = parse_input_params(argc, argv);
 	if (parse_result.Has_Error()) {
@@ -102,7 +96,7 @@ int wmain(int argc, wchar_t** argv) {
 
 		try {
 			stats::benchmark_function(L"Entire calculation", [&input_params, &result]() {
-				const std::size_t chunk_size = env::s_stream_size * env::s_stream_size;	// TODO konstanta
+				const std::size_t chunk_size = env::s_stream_size * env::s_stream_size;
 				std::vector<std::future<CStatistics>> futures;
 				std::vector<CStatistics> results;
 
@@ -122,8 +116,8 @@ int wmain(int argc, wchar_t** argv) {
 						return EXIT_FAILURE;
 					}
 
+					// if we have less than 256 values, we ignore the input
 					if (loaded_doubles >= env::s_stream_size) {
-						trim_buffer(buffer, loaded_doubles);
 
 						futures.push_back(std::async(std::launch::async, [&calculator_ptr, buffer]() { return calculator_ptr->Analyze_Vector(buffer); }));
 						//results.push_back(calculator_ptr->Analyze_Vector(buffer));

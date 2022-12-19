@@ -15,9 +15,12 @@ public:
     std::size_t Load_Chunk(std::vector<double>& buffer);
 private:
     std::ifstream m_input_stream;
-    const std::size_t m_chunk_size;
+    std::size_t m_chunk_size;
     std::vector<std::wstring> m_errors;
     std::size_t m_file_size = 0;
+    std::vector<double> m_valid_backup;
+
+    void Load_Valid_Backup();
 };
 
 std::vector<double> load_data(const std::filesystem::path& path);

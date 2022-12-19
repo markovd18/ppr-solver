@@ -75,7 +75,6 @@ namespace ocl {
             auto name_iter = device_names.begin();
             while (name_iter != device_names.end()) {
                 if (*name_iter == cl_device_name) {
-                    // TODO side-effect, je to vhodne reseni?
                     device_names.erase(name_iter);
                     return true;
                 }

@@ -5,6 +5,30 @@
 
 #include "../include/data_loader.h"
 
+const bool is_valid_number(const double x) {
+	switch (std::fpclassify(x)) {
+		case FP_NORMAL:
+		case FP_ZERO:
+			return true;
+		default:
+			return false;
+	}
+}
+
+void erase_invalid_numbers(std::vector<double>& vector) {
+	auto iter = vector.begin();
+	vector.erase(
+		std::remove_if(vector.begin(), vector.end(), [](const double val) { return !is_valid_number(val); }), 
+		vector.end()
+	);
+}
+
+void trim_buffer(std::vector<double>& buffer, const std::size_t max_size) {
+	if (buffer.size() > max_size) {
+		buffer.resize(max_size);
+	}
+}
+
 std::vector<double> load_data(const std::filesystem::path& path) {
 	if (!std::filesystem::exists(path) || std::filesystem::is_directory(path)) {
 		std::wcout << L"File not found or is a directory" << std::endl;
@@ -52,12 +76,6 @@ std::string load_text_file(const std::filesystem::path& path) {
 	result.resize(file_size);
 	input_stream.read(result.data(), file_size);
 
-	/*if (!input_stream) {
-		std::wcout << L"Error pri cteni ze souboru" << std::endl;
-		return std::string();
-	}*/
-
-
 	return std::string(result.begin(), result.end());
 }
 
@@ -80,6 +98,10 @@ CData_Loader::CData_Loader(const std::filesystem::path& path, const std::size_t 
 	if (!Has_Error()) {
 		m_file_size = std::filesystem::file_size(path);
 	}
+
+	if (m_chunk_size == s_do_not_chunk) {
+		m_chunk_size = m_file_size;
+	}
 }
 
 bool CData_Loader::Has_Error() const {
@@ -99,13 +121,44 @@ std::size_t CData_Loader::Load_Chunk(std::vector<double>& buffer) {
 		return 0;
 	}
 
-	const auto chunk_size = m_chunk_size == s_do_not_chunk ? m_file_size : m_chunk_size;
+	if (m_valid_backup.empty()) {
+		Load_Valid_Backup();
+	}
 
-	m_input_stream.read(reinterpret_cast<char*>(buffer.data()), chunk_size);
+	if (!Has_Next_Chunk()) {
+		buffer = m_valid_backup;
+		return m_valid_backup.size();
+	}
+
+	m_input_stream.read(reinterpret_cast<char*>(buffer.data()), m_chunk_size);
 	if (m_input_stream.bad()) {
 		m_errors.push_back(L"Error while loading from input file");
 	}
 
-	return m_input_stream.gcount() / sizeof(double);
-	// TODO vymazat nevalidni data pres std::fp_classify a udelat boolean flag, jestli muze/nemuze byt poisson
+
+	const auto loaded_doubles = m_input_stream.gcount() / sizeof(double);
+	trim_buffer(buffer, loaded_doubles);
+
+	erase_invalid_numbers(buffer);
+	const auto buffer_size = m_chunk_size / sizeof(double);
+	while ((buffer.size() != buffer_size) && !m_valid_backup.empty()) {
+		buffer.push_back(m_valid_backup.back());
+		m_valid_backup.pop_back();
+	}
+
+	return buffer.size();
+}
+
+void CData_Loader::Load_Valid_Backup() {
+	const auto buffer_size = m_chunk_size / sizeof(double);
+	m_valid_backup.resize(buffer_size);
+	m_input_stream.read(reinterpret_cast<char*>(m_valid_backup.data()), m_chunk_size);
+	if (m_input_stream.bad()) {
+		m_errors.push_back(L"Error while loading from input file");
+		return;
+	}
+
+	erase_invalid_numbers(m_valid_backup);
+	const auto loaded_doubles = m_input_stream.gcount() / sizeof(double);
+	trim_buffer(m_valid_backup, loaded_doubles);
 }
