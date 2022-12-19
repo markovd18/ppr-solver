@@ -196,11 +196,11 @@ namespace ocl {
 
         static const std::size_t count = env::s_stream_size;
         
-        std::vector<double> result_n(data.size());
-        std::vector<double> result_M1(data.size());
-        std::vector<double> result_M2(data.size());
-        std::vector<double> result_M3(data.size());
-        std::vector<double> result_M4(data.size());
+        double result_n = 0.0;
+        double result_M1 = 0.0;
+        double result_M2 = 0.0;
+        double result_M3 = 0.0;
+        double result_M4 = 0.0;
 
         cl::Buffer numbers_buffer{ 
             device_program.context,
@@ -209,11 +209,11 @@ namespace ocl {
         };
 
         
-        cl::Buffer n_buffer{ device_program.context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(result_n), result_n.data() };
-        cl::Buffer M1_buffer{ device_program.context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(result_M1), result_M1.data() };
-        cl::Buffer M2_buffer{ device_program.context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(result_M2), result_M2.data() };
-        cl::Buffer M3_buffer{ device_program.context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(result_M3), result_M3.data() };
-        cl::Buffer M4_buffer{ device_program.context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(result_M4), result_M4.data() };
+        cl::Buffer n_buffer{ device_program.context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(&result_n), &result_n };
+        cl::Buffer M1_buffer{ device_program.context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(&result_M1), &result_M1 };
+        cl::Buffer M2_buffer{ device_program.context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(&result_M2), &result_M2 };
+        cl::Buffer M3_buffer{ device_program.context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(&result_M3), &result_M3 };
+        cl::Buffer M4_buffer{ device_program.context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(&result_M4), &result_M4 };
         
         const auto number_count = static_cast<cl_double>(data.size());
         try {
@@ -236,7 +236,7 @@ namespace ocl {
         }
        
         // TODO
-        return CStatistics(result_n[0], result_M1[0], result_M2[0], result_M3[0], result_M4[0]);
+        return CStatistics(result_n, result_M1, result_M2, result_M3, result_M4);
     }
 
     CDevice_Program::CDevice_Program(const cl::Device& device_ref) 
