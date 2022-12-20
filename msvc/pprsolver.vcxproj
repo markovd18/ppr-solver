@@ -28,6 +28,7 @@
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\cpu\distribution.cpp" />
     <ClCompile Include="..\src\ocl\ocl_statistics.cpp" />
+    <ClCompile Include="..\src\watchdog.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\include\benchmark.h" />
@@ -42,6 +43,7 @@
     <ClInclude Include="..\src\include\ocl\ocl_statistics.h" />
     <ClInclude Include="..\src\include\platform.h" />
     <ClInclude Include="..\src\include\util\string.h" />
+    <ClInclude Include="..\src\include\watchdog.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

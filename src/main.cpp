@@ -21,6 +21,7 @@
 #include "include/calculator_factory.h"
 #include "include/cpu/cpu_statistics.h"
 #include "include/env.h"
+#include "include/watchdog.h"
 
 void print_all_ocl_devices() {
 	try {
@@ -94,8 +95,12 @@ int wmain(int argc, wchar_t** argv) {
 	// TODO vymazat nevalidni data pres std::fp_classify a udelat boolean flag, jestli muze/nemuze byt poisson
 	CStatistics result;
 
+	Watchdog watchdog(std::chrono::milliseconds(1000));
+	watchdog.Start();
+
 		try {
-			stats::benchmark_function(L"Entire calculation", [&input_params, &result]() {
+			stats::benchmark_function(L"Entire calculation", [&input_params, &result, &watchdog]() {
+				
 				const std::size_t chunk_size = env::s_stream_size * env::s_stream_size;
 				std::vector<std::future<CStatistics>> futures;
 				std::vector<CStatistics> results;
@@ -119,7 +124,11 @@ int wmain(int argc, wchar_t** argv) {
 					// if we have less than 256 values, we ignore the input
 					if (loaded_doubles >= env::s_stream_size) {
 
-						futures.push_back(std::async(std::launch::async, [&calculator_ptr, buffer]() { return calculator_ptr->Analyze_Vector(buffer); }));
+						futures.push_back(std::async(std::launch::async, [&calculator_ptr, &watchdog, buffer]() { 
+							const auto result = calculator_ptr->Analyze_Vector(buffer); 
+							watchdog.Kick(buffer.size());
+							return result;
+						}));
 						//results.push_back(calculator_ptr->Analyze_Vector(buffer));
 					}
 				}
@@ -128,8 +137,11 @@ int wmain(int argc, wchar_t** argv) {
 				result = collect_result(futures);
 				//result = collect_result(results);
 			});
+			watchdog.Stop();
+
 			std::wcout << L"Calculated kurtosis: " << result.Kurtosis() << L"\n";
 			std::wcout << L"Calculated mean: " << result.Mean() << L"\n";
+
 
 			const dist::EDistribution calculated_distribution = dist::evaluate_distribution(result.Kurtosis(), result.Mean());
 			std::wcout << L"Determined distribution: " << dist::get_distribution_name(calculated_distribution) << std::endl;
