@@ -92,9 +92,8 @@ int wmain(int argc, wchar_t** argv) {
 
 	const auto& input_params = parse_result.Input_Params();
 	//const auto numbers = load_data(input_params.file_path);
-	// TODO vymazat nevalidni data pres std::fp_classify a udelat boolean flag, jestli muze/nemuze byt poisson
 	CStatistics result;
-
+	
 	Watchdog watchdog(std::chrono::milliseconds(1000));
 	watchdog.Start();
 
@@ -102,8 +101,6 @@ int wmain(int argc, wchar_t** argv) {
 			stats::benchmark_function(L"Entire calculation", [&input_params, &result, &watchdog]() {
 				
 				const std::size_t chunk_size = env::s_stream_size * env::s_stream_size;
-				std::vector<std::future<CStatistics>> futures;
-				std::vector<CStatistics> results;
 
 				CData_Loader data_loader(input_params.file_path, chunk_size);
 				if (data_loader.Has_Error()) {
@@ -111,10 +108,10 @@ int wmain(int argc, wchar_t** argv) {
 					return EXIT_FAILURE;
 				}
 
+				std::vector<std::future<CStatistics>> futures;
 				const auto calculator_ptr = create_statistics_calculator(input_params.platform);
 				while (data_loader.Has_Next_Chunk()) {
 					std::vector<double> buffer(chunk_size / sizeof(double));
-					// pokud je buffer 256 a ménì, vrací -nan, vnìjší froloop s tím nepoèítá
 					const auto loaded_doubles = data_loader.Load_Chunk(buffer);
 					if (data_loader.Has_Error()) {
 						print_errors(std::wcout, data_loader.Get_Errors());
@@ -123,19 +120,20 @@ int wmain(int argc, wchar_t** argv) {
 
 					// if we have less than 256 values, we ignore the input
 					if (loaded_doubles >= env::s_stream_size) {
-
 						futures.push_back(std::async(std::launch::async, [&calculator_ptr, &watchdog, buffer]() { 
 							const auto result = calculator_ptr->Analyze_Vector(buffer); 
 							watchdog.Kick(buffer.size());
 							return result;
 						}));
-						//results.push_back(calculator_ptr->Analyze_Vector(buffer));
+					}
+
+					if (futures.size() > env::s_stream_size) {
+						result = result + collect_result(futures);
+						futures.clear();
 					}
 				}
 
-				//const auto result = collect_result(futures);
-				result = collect_result(futures);
-				//result = collect_result(results);
+				result = result + collect_result(futures);
 			});
 			watchdog.Stop();
 

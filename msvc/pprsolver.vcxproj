@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\all_statistics.cpp" />
     <ClCompile Include="..\src\benchmark.cpp" />
     <ClCompile Include="..\src\calculator_factory.cpp" />
     <ClCompile Include="..\src\cpu\cpu_statistics.cpp" />
@@ -31,6 +32,7 @@
     <ClCompile Include="..\src\watchdog.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\include\all_statistics.h" />
     <ClInclude Include="..\src\include\benchmark.h" />
     <ClInclude Include="..\src\include\calculator_factory.h" />
     <ClInclude Include="..\src\include\cpu\cpu_statistics.h" />

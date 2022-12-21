@@ -19,6 +19,7 @@ namespace ocl {
     class COCL_Stats_Calculator : public CStatistics_Calculator {
     private:
         std::vector<CDevice_Program> m_device_programs;
+        std::vector<CDevice_Program>::iterator m_current_device;
     public:
         explicit COCL_Stats_Calculator(const std::vector<std::wstring>& device_names);
         CStatistics Analyze_Vector(const std::vector<double>& data) override;

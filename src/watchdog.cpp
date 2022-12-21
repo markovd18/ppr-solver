@@ -12,7 +12,7 @@ void Watchdog::Start() {
 
 void Watchdog::Stop() {
 	m_guarding = false;
-	m_watchdog_thread.join();	// TODO radìji join? guarding je false, takže by while-loop mìl skonèit
+	m_watchdog_thread.join();
 }
 
 void Watchdog::Kick(std::size_t processsed_items) {

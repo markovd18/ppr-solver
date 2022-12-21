@@ -159,42 +159,24 @@ namespace ocl {
             device_program.Set_Program(program);
             device_program.context = device_context;
         }
+
+        m_current_device = m_device_programs.begin();
         
     }
 
     CStatistics COCL_Stats_Calculator::Analyze_Vector(const std::vector<double>& data) {        
-        //const std::string kernel_code = load_text_file(KERNEL_SOURCE_PATH);
-
-        //if (kernel_code.empty()) {
-        //    throw std::runtime_error("Error while loading kernels");
-        //}
-
-        //cl::Program::Sources sources{ kernel_code };
-        //const auto& device_program = m_device_programs.front(); // TODO rozdelit na N casti a dat kazdymu zarizeni
-
-        //cl::Context device_context{ device_program.device };
-
-        //// program has to be compiled for every device
-        //cl::Program program(device_context, sources);
-
-        //try {
-        //     program.build(device_program, "-cl-std=CL2.0");
-        //} catch (...) {
-        //    cl_int buildErr = CL_SUCCESS;
-        //    auto buildInfo = program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(&buildErr);
-        //    std::string errors;
-        //    for (auto& pair : buildInfo) {
-        //        errors.append(pair.second).push_back('\n');
-        //    }
-
-        //    throw std::runtime_error("Error while building OpenCL program: " + errors);
-        //}
-
-        const auto& device_program = m_device_programs.front(); // TODO rozdelit na N casti a dat kazdymu zarizeni
+        // selects in round-robin-like way next device to execute on
+        // if we're at the end, returns to the beginning
+        const auto& device_program = *m_current_device;
+        m_current_device++;
+        if (m_current_device == m_device_programs.end()) {
+            m_current_device = m_device_programs.begin();
+        }
+        
         cl::Kernel kernel(device_program.program, "reduce_kernel");
 
         static const std::size_t count = env::s_stream_size;
-        
+
         double result_n = 0.0;
         double result_M1 = 0.0;
         double result_M2 = 0.0;
@@ -234,7 +216,6 @@ namespace ocl {
             throw std::runtime_error(std::move(error_message.c_str()));
         }
        
-        // TODO
         return CStatistics(result_n, result_M1, result_M2, result_M3, result_M4);
     }
 
