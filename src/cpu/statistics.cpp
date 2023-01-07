@@ -12,6 +12,18 @@ double CStatistics::Kurtosis() const {
     return m_n * m_M4 / (m_M2 * m_M2) - 3.0;
 }
 
+double CStatistics::Variance() const {
+    return m_M2 / (m_n - 1.0);
+}
+
+double CStatistics::M3() const {
+    return m_M3;
+}
+
+double CStatistics::M4() const {
+    return m_M4;
+}
+
 CStatistics operator+(const CStatistics a, const CStatistics b) {
     CStatistics combined;
 

@@ -7,8 +7,8 @@ void stats::benchmark_function(const std::wstring& name, const std::function<voi
 	const auto start = std::chrono::high_resolution_clock::now();
 	function();
 	const auto end = std::chrono::high_resolution_clock::now();
-	const auto diff = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+	const auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-	std::wcout << name << L" - duration: " << diff.count() << L"us." << std::endl;
+	std::wcout << name << L" - duration: " << diff.count() << L"ms." << std::endl;
 
 }

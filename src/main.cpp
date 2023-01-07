@@ -35,11 +35,11 @@ void print_all_ocl_devices() {
 
 			for (auto& device : devices) {
 				auto desc = device.getInfo<CL_DEVICE_NAME>();
-				std::cout << "Testuji zarizeni " << desc << " na platforme " << platform.getInfo<CL_PLATFORM_NAME>() << "...\n";
+				std::cout << "Testing device " << desc << " on platform " << platform.getInfo<CL_PLATFORM_NAME>() << "...\n";
 			}
 		}
 	} catch (const cl::Error& err) {
-		std::cerr << "Chyba: " << err.what() << "(" << err.err() << ")\n";
+		std::cerr << "Error: " << err.what() << "(" << err.err() << ")\n";
 	}
 }
 
@@ -51,7 +51,7 @@ void print_usage(std::wostream& ostream) {
 	ostream << L"Usage: pprsolver.exe input_file_path (<PLATFORM_TYPE> | *<OPEN_CL_DEVICE_NAME>)\n"
 		<< L"PLATFORM_TYPE:\n"
 		<< L"\tSMP - performs computation on SMP only\n"
-		<< L"\tALL - performs computation on SMP and all available OpenCL devices\n"
+		<< L"\tall - performs computation on SMP and all available OpenCL devices\n"
 		<< L"*<OPEN_CL_DEVICE_NAME> - list of OCL device names to compute on" << std::endl;
 }
 
@@ -91,55 +91,52 @@ int wmain(int argc, wchar_t** argv) {
 	}
 
 	const auto& input_params = parse_result.Input_Params();
-	//const auto numbers = load_data(input_params.file_path);
 	CStatistics result;
 	
-	Watchdog watchdog(std::chrono::milliseconds(1000));
-	watchdog.Start();
+		Watchdog watchdog(std::chrono::milliseconds(1000));
+		watchdog.Start();
 
-		try {
-			stats::benchmark_function(L"Entire calculation", [&input_params, &result, &watchdog]() {
-				
-				const std::size_t chunk_size = env::s_stream_size * env::s_stream_size;
+		try {	
+			const std::size_t chunk_size = env::s_stream_size * env::s_stream_size;
 
-				CData_Loader data_loader(input_params.file_path, chunk_size);
+			CData_Loader data_loader(input_params.file_path, chunk_size);
+			if (data_loader.Has_Error()) {
+				print_errors(std::wcout, data_loader.Get_Errors());
+				return EXIT_FAILURE;
+			}
+
+			std::vector<std::future<CStatistics>> futures;
+			const auto calculator_ptr = create_statistics_calculator(input_params.platform);
+			while (data_loader.Has_Next_Chunk()) {
+				std::vector<double> buffer(chunk_size / sizeof(double));
+				const auto loaded_doubles = data_loader.Load_Chunk(buffer);
 				if (data_loader.Has_Error()) {
 					print_errors(std::wcout, data_loader.Get_Errors());
 					return EXIT_FAILURE;
 				}
 
-				std::vector<std::future<CStatistics>> futures;
-				const auto calculator_ptr = create_statistics_calculator(input_params.platform);
-				while (data_loader.Has_Next_Chunk()) {
-					std::vector<double> buffer(chunk_size / sizeof(double));
-					const auto loaded_doubles = data_loader.Load_Chunk(buffer);
-					if (data_loader.Has_Error()) {
-						print_errors(std::wcout, data_loader.Get_Errors());
-						return EXIT_FAILURE;
-					}
-
-					// if we have less than 256 values, we ignore the input
-					if (loaded_doubles >= env::s_stream_size) {
-						futures.push_back(std::async(std::launch::async, [&calculator_ptr, &watchdog, buffer]() { 
-							const auto result = calculator_ptr->Analyze_Vector(buffer); 
-							watchdog.Kick(buffer.size());
-							return result;
-						}));
-					}
-
-					if (futures.size() > env::s_stream_size) {
-						result = result + collect_result(futures);
-						futures.clear();
-					}
+				// if we have less than 256 values, we ignore the input
+				if (loaded_doubles >= env::s_stream_size) {
+					futures.push_back(std::async(std::launch::async, [&calculator_ptr, &watchdog, buffer]() { 
+						const auto result = calculator_ptr->Analyze_Vector(buffer); 
+						watchdog.Kick(buffer.size());
+						return result;
+					}));
 				}
 
-				result = result + collect_result(futures);
-			});
+				// vector size barrier, just so it does not grow infinitely
+				if (futures.size() > env::s_stream_size) {
+					result = result + collect_result(futures);
+					futures.clear();
+				}
+			}
+
+			result = result + collect_result(futures);
 			watchdog.Stop();
 
 			std::wcout << L"Calculated kurtosis: " << result.Kurtosis() << L"\n";
 			std::wcout << L"Calculated mean: " << result.Mean() << L"\n";
-
+			std::wcout << L"Calculated variance: " << result.Variance() << L"\n";
 
 			const dist::EDistribution calculated_distribution = dist::evaluate_distribution(result.Kurtosis(), result.Mean());
 			std::wcout << L"Determined distribution: " << dist::get_distribution_name(calculated_distribution) << std::endl;

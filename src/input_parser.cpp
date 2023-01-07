@@ -17,8 +17,6 @@ std::wstring validate_input_params(const int argc, wchar_t** argv) {
 		return L"Not enough arguments passed.";
 	}
 
-	// TODO validace typu platformy?
-
 	const std::filesystem::path input_file(argv[INPUT_FILE_ARG_INDEX]);
 	if (!std::filesystem::exists(argv[INPUT_FILE_ARG_INDEX])) {
 		return L"Input file does not exist.";

@@ -64,11 +64,8 @@ namespace ocl {
     };
 
     void lookup_ocl_devices(std::vector<std::wstring> device_names, CDevice_Lookup_Result& result) {
-        cl::Device device;
-
         std::vector<cl::Platform> platforms;
         cl::Platform::get(&platforms);
-        cl::Platform plat;
 
         const auto name_equals = [&device_names](const cl::Device& device) {
             const auto cl_device_name = ascii_string_to_wstring(device.getInfo<CL_DEVICE_NAME>());

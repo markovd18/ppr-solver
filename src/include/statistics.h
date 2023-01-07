@@ -6,6 +6,9 @@ public:
     CStatistics() {};
     double Mean() const;
     double Kurtosis() const;
+    double Variance() const;
+    double M3() const;
+    double M4() const;
 
     friend CStatistics operator+(const CStatistics a, const CStatistics b);
 private:
